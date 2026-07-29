@@ -1,41 +1,61 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { prisma } from "./prisma";
+import prisma from "@/lib/prisma";
 
-export async function getAdmin() {
+export async function getCurrentAdmin() {
   const cookieStore = await cookies();
 
-  const session =
-    cookieStore.get("admin_session");
+  const session = cookieStore.get("admin_session");
 
   if (!session?.value) {
-    redirect("/admin/login");
+    return null;
   }
 
-  const admin =
-    await prisma.admin.findUnique({
-      where: {
-        id: session.value,
-      },
-    });
+  const admin = await prisma.admin.findUnique({
+    where: {
+      id: session.value,
+    },
+  });
 
   if (!admin) {
-    redirect("/admin/login");
+    return null;
   }
 
   if (!admin.active) {
-    redirect("/admin/login");
+    return null;
   }
 
   return admin;
 }
 
 export async function requireAdmin() {
-  const admin = await getAdmin();
+  const admin = await getCurrentAdmin();
 
-  if (admin.role !== "ADMIN") {
+  if (!admin) {
+    redirect("/admin/login");
+  }
+
+  return admin;
+}
+
+export async function requireRole(
+  roles: string[]
+) {
+  const admin = await requireAdmin();
+
+  if (!roles.includes(admin.role)) {
     redirect("/admin");
   }
 
   return admin;
+}
+
+export async function isAdmin() {
+  const admin = await getCurrentAdmin();
+
+  if (!admin) {
+    return false;
+  }
+
+  return admin.role === "ADMIN";
 }
