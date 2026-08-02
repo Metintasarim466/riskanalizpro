@@ -1,10 +1,22 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+
+import prisma from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
+
+    if (!email || !password) {
+      return NextResponse.json(
+        {
+          error: "E-posta ve şifre zorunludur.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
     const admin = await prisma.admin.findUnique({
       where: {
@@ -12,16 +24,27 @@ export async function POST(request: Request) {
       },
     });
 
-    if (!admin.active) {
-  return NextResponse.json(
-    {
-      error: "Hesap pasif.",
-    },
-    {
-      status: 403,
+    if (!admin) {
+      return NextResponse.json(
+        {
+          error: "E-posta veya şifre hatalı.",
+        },
+        {
+          status: 401,
+        }
+      );
     }
-  );
-}
+
+    if (!admin.active) {
+      return NextResponse.json(
+        {
+          error: "Bu hesap pasif durumdadır.",
+        },
+        {
+          status: 403,
+        }
+      );
+    }
 
     const passwordMatch = await bcrypt.compare(
       password,
@@ -31,7 +54,7 @@ export async function POST(request: Request) {
     if (!passwordMatch) {
       return NextResponse.json(
         {
-          error: "E-posta veya şifre hatalı",
+          error: "E-posta veya şifre hatalı.",
         },
         {
           status: 401,
@@ -39,8 +62,18 @@ export async function POST(request: Request) {
       );
     }
 
+    await prisma.admin.update({
+      where: {
+        id: admin.id,
+      },
+      data: {
+        lastLogin: new Date(),
+      },
+    });
+
     const response = NextResponse.json({
       success: true,
+      message: "Giriş başarılı.",
     });
 
     response.cookies.set("admin_session", admin.id, {
@@ -48,7 +81,7 @@ export async function POST(request: Request) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24,
+      maxAge: 60 * 60 * 24 * 7,
     });
 
     return response;
@@ -57,7 +90,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error: "Giriş sırasında hata oluştu",
+        error: "Sunucu hatası oluştu.",
       },
       {
         status: 500,

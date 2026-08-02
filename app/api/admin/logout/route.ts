@@ -5,7 +5,13 @@ export async function POST() {
     success: true,
   });
 
-  response.cookies.delete("admin_session");
+  response.cookies.set("admin_session", "", {
+    expires: new Date(0),
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
 
   return response;
 }
