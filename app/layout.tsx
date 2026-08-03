@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import OrganizationSchema from "@/components/seo/OrganizationSchema";
-import WebSiteSchema from "@/components/seo/WebSiteSchema";
+//import OrganizationSchema from "@/components/seo/OrganizationSchema";
+//import WebSiteSchema from "@/components/seo/WebSiteSchema";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -114,9 +114,9 @@ export default function RootLayout({
     >
       <body className="min-h-screen bg-[#030712] text-white antialiased">
          
-          <OrganizationSchema />
+        {/*<OrganizationSchema />
 
-         <WebSiteSchema />
+         <WebSiteSchema />*/}
        
         {children}
       </body>
