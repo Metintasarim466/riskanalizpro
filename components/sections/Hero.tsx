@@ -17,9 +17,9 @@ export default function Hero() {
 
       <div className="absolute -right-40 bottom-20 h-72 w-72 rounded-full bg-cyan-500/10 blur-[140px]" />
 
-      <div className="relative mx-auto max-w-7xl px-6 pt-40 pb-28">
+      <div className="relative mx-auto max-w-[1500px] px-10 pt-40 pb-32">
 
-        <div className="grid items-center gap-20 lg:grid-cols-2">
+        <div className="grid items-center gap-16 lg:grid-cols-[58%_42%]">
 
           <HeroContent />
 
